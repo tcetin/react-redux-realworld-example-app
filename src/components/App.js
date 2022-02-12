@@ -14,6 +14,7 @@ import Register from '../components/Register';
 import Settings from '../components/Settings';
 import { store } from '../store';
 import { push } from 'react-router-redux';
+import TrackerContext from '../context/TrackerContext';
 
 const mapStateToProps = state => {
   return {
@@ -21,7 +22,8 @@ const mapStateToProps = state => {
     appName: state.common.appName,
     currentUser: state.common.currentUser,
     redirectTo: state.common.redirectTo
-  }};
+  }
+};
 
 const mapDispatchToProps = dispatch => ({
   onLoad: (payload, token) =>
@@ -31,15 +33,24 @@ const mapDispatchToProps = dispatch => ({
 });
 
 class App extends React.Component {
+  static contextType = TrackerContext;
   componentWillReceiveProps(nextProps) {
     if (nextProps.redirectTo) {
       // this.context.router.replace(nextProps.redirectTo);
       store.dispatch(push(nextProps.redirectTo));
       this.props.onRedirect();
     }
+
+    if (nextProps.currentUser) {
+      const { identify } = this.context;
+      identify(nextProps.currentUser.email);
+    }
   }
 
   componentWillMount() {
+    const { init } = this.context;
+    init({ api_host: process.env.REACT_APP_API_URL });
+
     const token = window.localStorage.getItem('jwt');
     if (token) {
       agent.setToken(token);
@@ -55,8 +66,8 @@ class App extends React.Component {
           <Header
             appName={this.props.appName}
             currentUser={this.props.currentUser} />
-            <Switch>
-            <Route exact path="/" component={Home}/>
+          <Switch>
+            <Route exact path="/" component={Home} />
             <Route path="/login" component={Login} />
             <Route path="/register" component={Register} />
             <Route path="/editor/:slug" component={Editor} />
@@ -65,7 +76,7 @@ class App extends React.Component {
             <Route path="/settings" component={Settings} />
             <Route path="/@:username/favorites" component={ProfileFavorites} />
             <Route path="/@:username" component={Profile} />
-            </Switch>
+          </Switch>
         </div>
       );
     }
