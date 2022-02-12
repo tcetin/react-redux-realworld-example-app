@@ -2,7 +2,7 @@ import agent from '../agent';
 import Header from './Header';
 import React from 'react';
 import { connect } from 'react-redux';
-import { APP_LOAD, REDIRECT } from '../constants/actionTypes';
+import { APP_LOAD, REDIRECT, TRACKER_EVENT_TRIGGERED } from '../constants/actionTypes';
 import { Route, Switch } from 'react-router-dom';
 import Article from '../components/Article';
 import Editor from '../components/Editor';
@@ -15,13 +15,17 @@ import Settings from '../components/Settings';
 import { store } from '../store';
 import { push } from 'react-router-redux';
 import TrackerContext from '../context/TrackerContext';
+import { trackerEvent } from '../helpers';
+
 
 const mapStateToProps = state => {
   return {
     appLoaded: state.common.appLoaded,
     appName: state.common.appName,
     currentUser: state.common.currentUser,
-    redirectTo: state.common.redirectTo
+    redirectTo: state.common.redirectTo,
+    ...state.tracker,
+    token: state.common.token
   }
 };
 
@@ -29,27 +33,56 @@ const mapDispatchToProps = dispatch => ({
   onLoad: (payload, token) =>
     dispatch({ type: APP_LOAD, payload, token, skipTracking: true }),
   onRedirect: () =>
-    dispatch({ type: REDIRECT })
+    dispatch({ type: REDIRECT }),
+  triggerEvent: event => dispatch({
+    type: TRACKER_EVENT_TRIGGERED,
+    payload: {
+      event,
+      $currentUrl: window.location.href,
+      distinctId: new Date().getTime(),
+    }
+  })
 });
 
 class App extends React.Component {
   static contextType = TrackerContext;
   componentWillReceiveProps(nextProps) {
+
     if (nextProps.redirectTo) {
       // this.context.router.replace(nextProps.redirectTo);
       store.dispatch(push(nextProps.redirectTo));
       this.props.onRedirect();
     }
+  }
 
-    if (nextProps.currentUser) {
-      const { identify } = this.context;
-      identify(nextProps.currentUser.email);
+  componentDidUpdate(prevProps) {
+
+    if (this.props.currentUser) {
+      if (this.props.currentUser !== prevProps.currentUser) {
+        const { identify } = this.context;
+        identify(this.props.currentUser.email);
+      }
+    }
+
+    if (this.props.eventDistinctId !== prevProps.eventDistinctId) {
+      const { track } = this.context;
+      track({
+        event: this.props.trackerEvent,
+        properties: {
+          distinct_id: this.props.eventDistinctId,
+          token: this.props.token,
+          $currentUrl: this.props.$currentUrl,
+          ...trackerEvent.getProperties()
+        }
+      })
     }
   }
 
   componentWillMount() {
     const { init } = this.context;
-    init({ api_host: process.env.REACT_APP_API_URL });
+    init({
+      api_host: process.env.REACT_APP_API_URL,
+    });
 
     const token = window.localStorage.getItem('jwt');
     if (token) {
@@ -59,13 +92,17 @@ class App extends React.Component {
     this.props.onLoad(token ? agent.Auth.current() : null, token);
   }
 
+
   render() {
     if (this.props.appLoaded) {
       return (
         <div>
           <Header
             appName={this.props.appName}
-            currentUser={this.props.currentUser} />
+            currentUser={this.props.currentUser}
+            HeaderClick={(link) => {
+              this.props.triggerEvent(`header - click ${link}`);
+            }} />
           <Switch>
             <Route exact path="/" component={Home} />
             <Route path="/login" component={Login} />

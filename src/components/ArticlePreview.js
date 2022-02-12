@@ -2,10 +2,11 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import agent from '../agent';
 import { connect } from 'react-redux';
-import { ARTICLE_FAVORITED, ARTICLE_UNFAVORITED } from '../constants/actionTypes';
+import { ARTICLE_FAVORITED, ARTICLE_UNFAVORITED, TRACKER_EVENT_TRIGGERED } from '../constants/actionTypes';
 
 const FAVORITED_CLASS = 'btn btn-sm btn-primary';
 const NOT_FAVORITED_CLASS = 'btn btn-sm btn-outline-primary';
+
 
 const mapDispatchToProps = dispatch => ({
   favorite: slug => dispatch({
@@ -15,6 +16,14 @@ const mapDispatchToProps = dispatch => ({
   unfavorite: slug => dispatch({
     type: ARTICLE_UNFAVORITED,
     payload: agent.Articles.unfavorite(slug)
+  }),
+  triggerEvent: event => dispatch({
+    type: TRACKER_EVENT_TRIGGERED,
+    payload: {
+      event,
+      $currentUrl: window.location.href,
+      distinctId: new Date().getTime(),
+    }
   })
 });
 
@@ -31,6 +40,8 @@ const ArticlePreview = props => {
     } else {
       props.favorite(article.slug);
     }
+    props.triggerEvent(`home ArticlePreview - click ${article.slug} ${article.favorited ? 'unfavorited' : 'favorited'}`);
+
   };
 
   return (

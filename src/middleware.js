@@ -4,8 +4,9 @@ import {
   ASYNC_END,
   LOGIN,
   LOGOUT,
-  REGISTER
+  REGISTER,
 } from './constants/actionTypes';
+import { v4 as uuidv4 } from 'uuid';
 
 const promiseMiddleware = store => next => action => {
   if (isPromise(action.payload)) {
@@ -55,6 +56,11 @@ const localStorageMiddleware = store => next => action => {
   } else if (action.type === LOGOUT) {
     window.localStorage.setItem('jwt', '');
     agent.setToken(null);
+  }
+
+  let device_id = window.localStorage.getItem('$device_id');
+  if (!device_id) {
+    window.localStorage.setItem('$device_id', uuidv4());
   }
 
   next(action);

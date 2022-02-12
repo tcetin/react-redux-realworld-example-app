@@ -6,7 +6,8 @@ import { connect } from 'react-redux';
 import {
   UPDATE_FIELD_AUTH,
   LOGIN,
-  LOGIN_PAGE_UNLOADED
+  LOGIN_PAGE_UNLOADED,
+  TRACKER_EVENT_TRIGGERED
 } from '../constants/actionTypes';
 
 const mapStateToProps = state => ({ ...state.auth });
@@ -19,17 +20,33 @@ const mapDispatchToProps = dispatch => ({
   onSubmit: (email, password) =>
     dispatch({ type: LOGIN, payload: agent.Auth.login(email, password) }),
   onUnload: () =>
-    dispatch({ type: LOGIN_PAGE_UNLOADED })
+    dispatch({ type: LOGIN_PAGE_UNLOADED }),
+  triggerEvent: event => dispatch({
+    type: TRACKER_EVENT_TRIGGERED,
+    payload: {
+      event,
+      $currentUrl: window.location.href,
+      distinctId: new Date().getTime(),
+    }
+  })
 });
 
 class Login extends React.Component {
   constructor() {
     super();
-    this.changeEmail = ev => this.props.onChangeEmail(ev.target.value);
-    this.changePassword = ev => this.props.onChangePassword(ev.target.value);
+    this.changeEmail = ev => {
+      this.props.triggerEvent("login - email change event");
+      return this.props.onChangeEmail(ev.target.value);
+    }
+    this.changePassword = ev => {
+      this.props.triggerEvent("login - password change event");
+      return this.props.onChangePassword(ev.target.value);
+    }
     this.submitForm = (email, password) => ev => {
       ev.preventDefault();
+      this.props.triggerEvent("login - submit form")
       this.props.onSubmit(email, password);
+
     };
   }
 

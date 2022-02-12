@@ -9,7 +9,7 @@ export const TrackerProvider = ({ children }) => {
 
     const init = (config) => { setConfig(config) }
     const identify = (user) => { setUser(user) }
-    const track = (event) => { setEvents(prevState => ([...prevState, event])) }
+    const track = (_event) => { setEvents(prevState => ([...prevState, _event])) }
 
     return <TrackerContext.Provider value={{ config, init, user, identify, events, track }}>
         {children}
