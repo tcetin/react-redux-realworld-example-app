@@ -35,12 +35,14 @@ const ArticlePreview = props => {
 
   const handleClick = ev => {
     ev.preventDefault();
+
+    props.triggerEvent(`home - click ${article.slug} article preview favorite/unfovarite`);
+
     if (article.favorited) {
       props.unfavorite(article.slug);
     } else {
       props.favorite(article.slug);
     }
-    props.triggerEvent(`home ArticlePreview - click ${article.slug} ${article.favorited ? 'unfavorited' : 'favorited'}`);
 
   };
 

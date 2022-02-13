@@ -6,7 +6,8 @@ import { connect } from 'react-redux';
 import {
   UPDATE_FIELD_AUTH,
   REGISTER,
-  REGISTER_PAGE_UNLOADED
+  REGISTER_PAGE_UNLOADED,
+  TRACKER_EVENT_TRIGGERED
 } from '../constants/actionTypes';
 
 const mapStateToProps = state => ({ ...state.auth });
@@ -23,17 +24,35 @@ const mapDispatchToProps = dispatch => ({
     dispatch({ type: REGISTER, payload })
   },
   onUnload: () =>
-    dispatch({ type: REGISTER_PAGE_UNLOADED })
+    dispatch({ type: REGISTER_PAGE_UNLOADED }),
+  triggerEvent: event => dispatch({
+    type: TRACKER_EVENT_TRIGGERED,
+    payload: {
+      event,
+      $currentUrl: window.location.href,
+      distinctId: new Date().getTime(),
+    }
+  })
 });
 
 class Register extends React.Component {
   constructor() {
     super();
-    this.changeEmail = ev => this.props.onChangeEmail(ev.target.value);
-    this.changePassword = ev => this.props.onChangePassword(ev.target.value);
-    this.changeUsername = ev => this.props.onChangeUsername(ev.target.value);
+    this.changeEmail = ev => {
+      this.props.triggerEvent("register -  change email");
+      return this.props.onChangeEmail(ev.target.value)
+    }
+    this.changePassword = ev => {
+      this.props.triggerEvent("register -  change password");
+      return this.props.onChangePassword(ev.target.value)
+    }
+    this.changeUsername = ev => {
+      this.props.triggerEvent("register -  change username");
+      return this.props.onChangeUsername(ev.target.value)
+    }
     this.submitForm = (username, email, password) => ev => {
       ev.preventDefault();
+      this.props.triggerEvent("register -  submit form");
       this.props.onSubmit(username, email, password);
     }
   }

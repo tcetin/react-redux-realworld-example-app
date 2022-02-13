@@ -7,7 +7,8 @@ import {
   FOLLOW_USER,
   UNFOLLOW_USER,
   PROFILE_PAGE_LOADED,
-  PROFILE_PAGE_UNLOADED
+  PROFILE_PAGE_UNLOADED,
+  TRACKER_EVENT_TRIGGERED
 } from '../constants/actionTypes';
 
 const EditProfileSettings = props => {
@@ -37,6 +38,7 @@ const FollowUserButton = props => {
 
   const handleClick = ev => {
     ev.preventDefault();
+    props.triggerEvent("profile - click follow/unfollow button");
     if (props.user.following) {
       props.unfollow(props.user.username)
     } else {
@@ -71,7 +73,15 @@ const mapDispatchToProps = dispatch => ({
     type: UNFOLLOW_USER,
     payload: agent.Profile.unfollow(username)
   }),
-  onUnload: () => dispatch({ type: PROFILE_PAGE_UNLOADED })
+  onUnload: () => dispatch({ type: PROFILE_PAGE_UNLOADED }),
+  triggerEvent: event => dispatch({
+    type: TRACKER_EVENT_TRIGGERED,
+    payload: {
+      event,
+      $currentUrl: window.location.href,
+      distinctId: new Date().getTime(),
+    }
+  })
 });
 
 class Profile extends React.Component {
@@ -135,7 +145,7 @@ class Profile extends React.Component {
                   user={profile}
                   follow={this.props.onFollow}
                   unfollow={this.props.onUnfollow}
-                  />
+                />
 
               </div>
             </div>

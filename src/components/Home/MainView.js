@@ -2,7 +2,7 @@ import ArticleList from '../ArticleList';
 import React from 'react';
 import agent from '../../agent';
 import { connect } from 'react-redux';
-import { CHANGE_TAB } from '../../constants/actionTypes';
+import { CHANGE_TAB, TRACKER_EVENT_TRIGGERED } from '../../constants/actionTypes';
 
 const YourFeedTab = props => {
   if (props.token) {
@@ -13,9 +13,9 @@ const YourFeedTab = props => {
 
     return (
       <li className="nav-item">
-        <a  href=""
-            className={ props.tab === 'feed' ? 'nav-link active' : 'nav-link' }
-            onClick={clickHandler}>
+        <a href=""
+          className={props.tab === 'feed' ? 'nav-link active' : 'nav-link'}
+          onClick={clickHandler}>
           Your Feed
         </a>
       </li>
@@ -33,7 +33,7 @@ const GlobalFeedTab = props => {
     <li className="nav-item">
       <a
         href=""
-        className={ props.tab === 'all' ? 'nav-link active' : 'nav-link' }
+        className={props.tab === 'all' ? 'nav-link active' : 'nav-link'}
         onClick={clickHandler}>
         Global Feed
       </a>
@@ -62,7 +62,15 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  onTabClick: (tab, pager, payload) => dispatch({ type: CHANGE_TAB, tab, pager, payload })
+  onTabClick: (tab, pager, payload) => dispatch({ type: CHANGE_TAB, tab, pager, payload }),
+  triggerEvent: event => dispatch({
+    type: TRACKER_EVENT_TRIGGERED,
+    payload: {
+      event,
+      $currentUrl: window.location.href,
+      distinctId: new Date().getTime(),
+    }
+  })
 });
 
 const MainView = props => {
@@ -74,9 +82,15 @@ const MainView = props => {
           <YourFeedTab
             token={props.token}
             tab={props.tab}
-            onTabClick={props.onTabClick} />
+            onTabClick={(tab, pager, payload) => {
+              props.triggerEvent("home - click your feed tab");
+              props.onTabClick(tab, pager, payload)
+            }} />
 
-          <GlobalFeedTab tab={props.tab} onTabClick={props.onTabClick} />
+          <GlobalFeedTab tab={props.tab} onTabClick={(tab, pager, payload) => {
+            props.triggerEvent("home - click global feed tab");
+            props.onTabClick(tab, pager, payload)
+          }} />
 
           <TagFilterTab tag={props.tag} />
 

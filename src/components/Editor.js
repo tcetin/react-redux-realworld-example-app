@@ -8,7 +8,8 @@ import {
   REMOVE_TAG,
   ARTICLE_SUBMITTED,
   EDITOR_PAGE_UNLOADED,
-  UPDATE_FIELD_EDITOR
+  UPDATE_FIELD_EDITOR,
+  TRACKER_EVENT_TRIGGERED
 } from '../constants/actionTypes';
 
 const mapStateToProps = state => ({
@@ -27,7 +28,15 @@ const mapDispatchToProps = dispatch => ({
   onUnload: payload =>
     dispatch({ type: EDITOR_PAGE_UNLOADED }),
   onUpdateField: (key, value) =>
-    dispatch({ type: UPDATE_FIELD_EDITOR, key, value })
+    dispatch({ type: UPDATE_FIELD_EDITOR, key, value }),
+  triggerEvent: event => dispatch({
+    type: TRACKER_EVENT_TRIGGERED,
+    payload: {
+      event,
+      $currentUrl: window.location.href,
+      distinctId: new Date().getTime(),
+    }
+  })
 });
 
 class Editor extends React.Component {
@@ -50,6 +59,7 @@ class Editor extends React.Component {
 
     this.removeTagHandler = tag => () => {
       this.props.onRemoveTag(tag);
+      this.props.triggerEvent("editor - click remove tag");
     };
 
     this.submitForm = ev => {
@@ -67,6 +77,7 @@ class Editor extends React.Component {
         agent.Articles.create(article);
 
       this.props.onSubmit(promise);
+      this.props.triggerEvent("editor - click editor submit button");
     };
   }
 
@@ -145,8 +156,8 @@ class Editor extends React.Component {
                         (this.props.tagList || []).map(tag => {
                           return (
                             <span className="tag-default tag-pill" key={tag}>
-                              <i  className="ion-close-round"
-                                  onClick={this.removeTagHandler(tag)}>
+                              <i className="ion-close-round"
+                                onClick={this.removeTagHandler(tag)}>
                               </i>
                               {tag}
                             </span>

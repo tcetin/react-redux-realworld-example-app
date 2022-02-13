@@ -2,16 +2,25 @@ import { Link } from 'react-router-dom';
 import React from 'react';
 import agent from '../../agent';
 import { connect } from 'react-redux';
-import { DELETE_ARTICLE } from '../../constants/actionTypes';
+import { DELETE_ARTICLE, TRACKER_EVENT_TRIGGERED } from '../../constants/actionTypes';
 
 const mapDispatchToProps = dispatch => ({
   onClickDelete: payload =>
-    dispatch({ type: DELETE_ARTICLE, payload })
+    dispatch({ type: DELETE_ARTICLE, payload }),
+  triggerEvent: event => dispatch({
+    type: TRACKER_EVENT_TRIGGERED,
+    payload: {
+      event,
+      $currentUrl: window.location.href,
+      distinctId: new Date().getTime(),
+    }
+  })
 });
 
 const ArticleActions = props => {
   const article = props.article;
   const del = () => {
+    props.triggerEvent("article - click delete article button");
     props.onClickDelete(agent.Articles.del(article.slug))
   };
   if (props.canModify) {

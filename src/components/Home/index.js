@@ -7,7 +7,8 @@ import { connect } from 'react-redux';
 import {
   HOME_PAGE_LOADED,
   HOME_PAGE_UNLOADED,
-  APPLY_TAG_FILTER
+  APPLY_TAG_FILTER,
+  TRACKER_EVENT_TRIGGERED
 } from '../../constants/actionTypes';
 
 const Promise = global.Promise;
@@ -24,7 +25,15 @@ const mapDispatchToProps = dispatch => ({
   onLoad: (tab, pager, payload) =>
     dispatch({ type: HOME_PAGE_LOADED, tab, pager, payload }),
   onUnload: () =>
-    dispatch({  type: HOME_PAGE_UNLOADED })
+    dispatch({ type: HOME_PAGE_UNLOADED }),
+  triggerEvent: event => dispatch({
+    type: TRACKER_EVENT_TRIGGERED,
+    payload: {
+      event,
+      $currentUrl: window.location.href,
+      distinctId: new Date().getTime(),
+    }
+  })
 });
 
 class Home extends React.Component {
@@ -58,7 +67,10 @@ class Home extends React.Component {
 
                 <Tags
                   tags={this.props.tags}
-                  onClickTag={this.props.onClickTag} />
+                  onClickTag={(tag, pager, payload) => {
+                    this.props.triggerEvent("home - click tag ");
+                    this.props.onClickTag(tag, pager, payload)
+                  }} />
 
               </div>
             </div>

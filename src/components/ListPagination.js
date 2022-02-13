@@ -1,11 +1,19 @@
 import React from 'react';
 import agent from '../agent';
 import { connect } from 'react-redux';
-import { SET_PAGE } from '../constants/actionTypes';
+import { SET_PAGE, TRACKER_EVENT_TRIGGERED } from '../constants/actionTypes';
 
 const mapDispatchToProps = dispatch => ({
   onSetPage: (page, payload) =>
-    dispatch({ type: SET_PAGE, page, payload })
+    dispatch({ type: SET_PAGE, page, payload }),
+  triggerEvent: event => dispatch({
+    type: TRACKER_EVENT_TRIGGERED,
+    payload: {
+      event,
+      $currentUrl: window.location.href,
+      distinctId: new Date().getTime(),
+    }
+  })
 });
 
 const ListPagination = props => {
@@ -19,9 +27,9 @@ const ListPagination = props => {
   }
 
   const setPage = page => {
-    if(props.pager) {
+    if (props.pager) {
       props.onSetPage(page, props.pager(page));
-    }else {
+    } else {
       props.onSetPage(page, agent.Articles.all(page))
     }
   };
@@ -35,11 +43,12 @@ const ListPagination = props => {
             const isCurrent = v === props.currentPage;
             const onClick = ev => {
               ev.preventDefault();
+              props.triggerEvent("list - click pagination");
               setPage(v);
             };
             return (
               <li
-                className={ isCurrent ? 'page-item active' : 'page-item' }
+                className={isCurrent ? 'page-item active' : 'page-item'}
                 onClick={onClick}
                 key={v.toString()}>
 

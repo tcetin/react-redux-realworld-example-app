@@ -1,24 +1,24 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-const LoggedOutView = ({ LinkClick = () => { }, ...props }) => {
+const LoggedOutView = props => {
   if (!props.currentUser) {
     return (
       <ul className="nav navbar-nav pull-xs-right">
 
-        <li className="nav-item" onClick={() => LinkClick("Home")}>
+        <li className="nav-item" >
           <Link to="/" className="nav-link">
             Home
           </Link>
         </li>
 
-        <li className="nav-item" onClick={() => LinkClick("Sign in")}>
+        <li className="nav-item">
           <Link to="/login" className="nav-link">
             Sign in
           </Link>
         </li>
 
-        <li className="nav-item" onClick={() => LinkClick("Sign up")}>
+        <li className="nav-item">
           <Link to="/register" className="nav-link">
             Sign up
           </Link>
@@ -30,30 +30,30 @@ const LoggedOutView = ({ LinkClick = () => { }, ...props }) => {
   return null;
 };
 
-const LoggedInView = ({ LinkClick = () => { }, ...props }) => {
+const LoggedInView = props => {
   if (props.currentUser) {
     return (
       <ul className="nav navbar-nav pull-xs-right">
 
-        <li className="nav-item" onClick={() => LinkClick("Home")}>
+        <li className="nav-item">
           <Link to="/" className="nav-link">
             Home
           </Link>
         </li>
 
-        <li className="nav-item" onClick={() => LinkClick("New Post")}>
+        <li className="nav-item">
           <Link to="/editor" className="nav-link">
             <i className="ion-compose"></i>&nbsp;New Post
           </Link>
         </li>
 
-        <li className="nav-item" onClick={() => LinkClick("Settings")}>
+        <li className="nav-item">
           <Link to="/settings" className="nav-link" >
             <i className="ion-gear-a"></i>&nbsp;Settings
           </Link>
         </li>
 
-        <li className="nav-item" onClick={() => LinkClick("Username")}>
+        <li className="nav-item">
           <Link
             to={`/@${props.currentUser.username}`}
             className="nav-link">
@@ -75,13 +75,13 @@ class Header extends React.Component {
       <nav className="navbar navbar-light">
         <div className="container">
 
-          <Link to="/" className="navbar-brand" onClick={() => this.props.HeaderClick("AppName")}>
+          <Link to="/" className="navbar-brand">
             {this.props.appName.toLowerCase()}
           </Link>
 
-          <LoggedOutView currentUser={this.props.currentUser} LinkClick={this.props.HeaderClick} />
+          <LoggedOutView currentUser={this.props.currentUser} />
 
-          <LoggedInView currentUser={this.props.currentUser} LinkClick={this.props.HeaderClick} />
+          <LoggedInView currentUser={this.props.currentUser} />
         </div>
       </nav>
     );

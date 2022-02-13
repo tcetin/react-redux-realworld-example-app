@@ -5,7 +5,8 @@ import { connect } from 'react-redux';
 import {
   SETTINGS_SAVED,
   SETTINGS_PAGE_UNLOADED,
-  LOGOUT
+  LOGOUT,
+  TRACKER_EVENT_TRIGGERED
 } from '../constants/actionTypes';
 
 class SettingsForm extends React.Component {
@@ -133,7 +134,15 @@ const mapDispatchToProps = dispatch => ({
   onClickLogout: () => dispatch({ type: LOGOUT }),
   onSubmitForm: user =>
     dispatch({ type: SETTINGS_SAVED, payload: agent.Auth.save(user) }),
-  onUnload: () => dispatch({ type: SETTINGS_PAGE_UNLOADED })
+  onUnload: () => dispatch({ type: SETTINGS_PAGE_UNLOADED }),
+  triggerEvent: event => dispatch({
+    type: TRACKER_EVENT_TRIGGERED,
+    payload: {
+      event,
+      $currentUrl: window.location.href,
+      distinctId: new Date().getTime(),
+    }
+  })
 });
 
 class Settings extends React.Component {
@@ -150,13 +159,19 @@ class Settings extends React.Component {
 
               <SettingsForm
                 currentUser={this.props.currentUser}
-                onSubmitForm={this.props.onSubmitForm} />
+                onSubmitForm={(user) => {
+                  this.props.triggerEvent("settings -  update form submit");
+                  this.props.onSubmitForm(user)
+                }} />
 
               <hr />
 
               <button
                 className="btn btn-outline-danger"
-                onClick={this.props.onClickLogout}>
+                onClick={() => {
+                  this.props.triggerEvent("settings - click logout button");
+                  this.props.onClickLogout();
+                }}>
                 Or click here to logout.
               </button>
 
