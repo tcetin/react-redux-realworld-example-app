@@ -59,7 +59,7 @@ class Editor extends React.Component {
 
     this.removeTagHandler = tag => () => {
       this.props.onRemoveTag(tag);
-      this.props.triggerEvent("editor - click remove tag");
+      this.props.triggerEvent(`editor - click remove ${tag} tag`);
     };
 
     this.submitForm = ev => {

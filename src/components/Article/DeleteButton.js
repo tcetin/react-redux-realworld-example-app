@@ -18,7 +18,7 @@ const mapDispatchToProps = dispatch => ({
 
 const DeleteButton = props => {
   const del = () => {
-    props.triggerEvent("comment - click delete comment button");
+    props.triggerEvent(`comment - click delete ${props.slug} comment`);
     const payload = agent.Comments.delete(props.slug, props.commentId);
     props.onClick(payload, props.commentId);
   };

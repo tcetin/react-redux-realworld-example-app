@@ -38,7 +38,7 @@ const FollowUserButton = props => {
 
   const handleClick = ev => {
     ev.preventDefault();
-    props.triggerEvent("profile - click follow/unfollow button");
+    props.triggerEvent(`profile - click ${props.user.following ? 'unfollow' : 'follow'} button`);
     if (props.user.following) {
       props.unfollow(props.user.username)
     } else {

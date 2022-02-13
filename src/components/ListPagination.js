@@ -43,7 +43,7 @@ const ListPagination = props => {
             const isCurrent = v === props.currentPage;
             const onClick = ev => {
               ev.preventDefault();
-              props.triggerEvent("list - click pagination");
+              props.triggerEvent(`list - click ${v} pagination`);
               setPage(v);
             };
             return (
