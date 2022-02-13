@@ -28,7 +28,8 @@ const mapStateToProps = state => {
     eventDistinctId: state.tracker.eventDistinctId,
     $currentUrl: state.tracker.$currentUrl,
     trackerEvent: state.tracker.trackerEvent,
-    token: state.common.token
+    token: state.common.token,
+    location: state.router.location.pathname
   }
 };
 
@@ -40,8 +41,8 @@ const mapDispatchToProps = dispatch => ({
   triggerEvent: event => dispatch({
     type: TRACKER_EVENT_TRIGGERED,
     payload: {
-      event,
-      $currentUrl: window.location.href,
+      event: event.eventName,
+      $currentUrl: event.currentUrl,
       distinctId: new Date().getTime(),
     }
   }),
@@ -73,7 +74,7 @@ class App extends React.Component {
     }, 10000);
   }
 
-  componentWillReceiveProps(prevProps, nextProps) {
+  componentWillReceiveProps(nextProps) {
 
     if (nextProps.redirectTo) {
       // this.context.router.replace(nextProps.redirectTo);
@@ -81,17 +82,22 @@ class App extends React.Component {
       this.props.onRedirect();
     }
 
-    if (nextProps.currentUser) {
+  }
+
+  componentDidUpdate(prevProps) {
+
+    const { track, events, config, clearEvents } = this.context;
+
+    if (prevProps.currentUser !== this.props.currentUser) {
       const { identify } = this.context;
       identify(this.props.currentUser.email);
     }
 
+    if (prevProps.location !== this.props.location) {
+      this.props.triggerEvent({ eventName: `router - location change to ${this.props.location}`, currentUrl: `${window.location.origin}${prevProps.location}` });
+    }
 
-  }
-
-  componentDidUpdate(prevProps) {
     if (prevProps.eventDistinctId !== this.props.eventDistinctId) {
-      const { track } = this.context;
       track({
         event: this.props.trackerEvent,
         properties: {
@@ -102,27 +108,8 @@ class App extends React.Component {
         }
       })
     }
-  }
 
-  componentWillMount() {
-    const { init } = this.context;
-    init({
-      api_host: process.env.REACT_APP_API_URL,
-    });
-
-    const token = window.localStorage.getItem('jwt');
-    if (token) {
-      agent.setToken(token);
-    }
-
-    this.props.onLoad(token ? agent.Auth.current() : null, token);
-
-
-  }
-
-  componentWillUpdate(nextProps, nextState) {
-    if (nextState.saveEvents) {
-      const { events, config, clearEvents } = this.context;
+    if (this.state.saveEvents) {
       if (events.length) {
         this.props.trackerEventsSaveStarted();
         trackerService.saveTrackerEvents(events, config.api_host)
@@ -140,6 +127,22 @@ class App extends React.Component {
           });
       }
     }
+  }
+
+  componentWillMount() {
+    const { init } = this.context;
+    init({
+      api_host: process.env.REACT_APP_API_URL,
+    });
+
+    const token = window.localStorage.getItem('jwt');
+    if (token) {
+      agent.setToken(token);
+    }
+
+    this.props.onLoad(token ? agent.Auth.current() : null, token);
+
+
   }
 
   componentWillUnmount() {

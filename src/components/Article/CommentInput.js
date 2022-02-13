@@ -1,11 +1,19 @@
 import React from 'react';
 import agent from '../../agent';
 import { connect } from 'react-redux';
-import { ADD_COMMENT } from '../../constants/actionTypes';
+import { ADD_COMMENT, TRACKER_EVENT_TRIGGERED } from '../../constants/actionTypes';
 
 const mapDispatchToProps = dispatch => ({
   onSubmit: payload =>
-    dispatch({ type: ADD_COMMENT, payload })
+    dispatch({ type: ADD_COMMENT, payload }),
+  triggerEvent: event => dispatch({
+    type: TRACKER_EVENT_TRIGGERED,
+    payload: {
+      event,
+      $currentUrl: window.location.href,
+      distinctId: new Date().getTime(),
+    }
+  })
 });
 
 class CommentInput extends React.Component {
@@ -16,11 +24,13 @@ class CommentInput extends React.Component {
     };
 
     this.setBody = ev => {
+      this.props.triggerEvent("comment - create commit set body");
       this.setState({ body: ev.target.value });
     };
 
     this.createComment = ev => {
       ev.preventDefault();
+      this.props.triggerEvent("comment - create commit submit form");
       const payload = agent.Comments.create(this.props.slug,
         { body: this.state.body });
       this.setState({ body: '' });

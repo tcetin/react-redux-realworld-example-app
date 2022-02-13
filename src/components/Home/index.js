@@ -68,7 +68,7 @@ class Home extends React.Component {
                 <Tags
                   tags={this.props.tags}
                   onClickTag={(tag, pager, payload) => {
-                    this.props.triggerEvent("home - click tag ");
+                    this.props.triggerEvent(`home - click ${tag} tag`);
                     this.props.onClickTag(tag, pager, payload)
                   }} />
 
