@@ -9,6 +9,7 @@ import {
   TRACKER_EVENT_TRIGGERED
 } from '../constants/actionTypes';
 
+
 class SettingsForm extends React.Component {
   constructor() {
     super();
@@ -25,6 +26,7 @@ class SettingsForm extends React.Component {
       const state = this.state;
       const newState = Object.assign({}, state, { [field]: ev.target.value });
       this.setState(newState);
+      this.props.onFieldChange(field);
     };
 
     this.submitForm = ev => {
@@ -60,6 +62,7 @@ class SettingsForm extends React.Component {
       }));
     }
   }
+
 
   render() {
     return (
@@ -159,6 +162,9 @@ class Settings extends React.Component {
 
               <SettingsForm
                 currentUser={this.props.currentUser}
+                onFieldChange={field => {
+                  this.props.triggerEvent(`settings form - ${field} change`);
+                }}
                 onSubmitForm={(user) => {
                   this.props.triggerEvent("settings -  update form submit");
                   this.props.onSubmitForm(user)
