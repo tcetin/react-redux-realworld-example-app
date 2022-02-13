@@ -101,7 +101,7 @@ class App extends React.Component {
             appName={this.props.appName}
             currentUser={this.props.currentUser}
             HeaderClick={(link) => {
-              this.props.triggerEvent(`header - click ${link}`);
+              //this.props.triggerEvent(`header - click ${link}`);
             }} />
           <Switch>
             <Route exact path="/" component={Home} />
