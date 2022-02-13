@@ -46,25 +46,25 @@ const mapDispatchToProps = dispatch => ({
 
 class App extends React.Component {
   static contextType = TrackerContext;
-  componentWillReceiveProps(nextProps) {
+
+  componentWillReceiveProps(prevProps, nextProps) {
 
     if (nextProps.redirectTo) {
       // this.context.router.replace(nextProps.redirectTo);
       store.dispatch(push(nextProps.redirectTo));
       this.props.onRedirect();
     }
+
+    if (nextProps.currentUser) {
+      const { identify } = this.context;
+      identify(this.props.currentUser.email);
+    }
+
+
   }
 
   componentDidUpdate(prevProps) {
-
-    if (this.props.currentUser) {
-      if (this.props.currentUser !== prevProps.currentUser) {
-        const { identify } = this.context;
-        identify(this.props.currentUser.email);
-      }
-    }
-
-    if (this.props.eventDistinctId !== prevProps.eventDistinctId) {
+    if (prevProps.eventDistinctId !== this.props.eventDistinctId) {
       const { track } = this.context;
       track({
         event: this.props.trackerEvent,
@@ -95,6 +95,8 @@ class App extends React.Component {
 
   render() {
     if (this.props.appLoaded) {
+      const { people } = this.context;
+      people.set({ "Plan": "Premium" });
       return (
         <div>
           <Header
